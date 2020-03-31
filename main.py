@@ -6,12 +6,36 @@ import keyring
 import requests
 import json
 import multiprocessing
+import ssl
 from flask import Flask
-web = Flask(__name__)
+from flask import Response
+from werkzeug import serving
+
+
+SERVER_NAME = 'gvs 1.0'
+class localFlask(Flask):
+    def process_response(self, response):
+        response.headers['Connection'] = 'close'
+        response.headers['Expires'] = response.headers['Date']
+        response.headers['Cache-Control'] = str(response.headers['Cache-Control']).replace('public', 'private')
+        response.headers['Alt-Svc'] = 'quic=":443"; ma=2592000; v="46,43",h3-Q050=":443"; ma=2592000,h3-Q049=":443"; ma=2592000,h3-Q048=":443"; ma=2592000,h3-Q046=":443"; ma=2592000,h3-Q043=":443"; ma=2592000,h3-T050=":443"; ma=2592000'
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['server'] = SERVER_NAME
+        del response.headers['ETag']
+        return(response)
+
+
+web = localFlask(__name__)
+
+context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+context.load_verify_locations("cert/ca_bundle.crt")
+context.load_cert_chain("cert/certificate.crt", "cert/private.key")
+
 
 DEBUG = 1
 
-ip = requests.get('https://api.ipify.org').text + ':5000'
+
+ip = requests.get('https://api.ipify.org').text + ':443'
 servicename = 'yandex_station_local_video'
 
 
@@ -76,7 +100,7 @@ class MainApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
 
     def playFile(self):
         selectedFile = self.filesList.currentItem().text()
-        self.sendToScreen('http://' + ip + '/static/' + selectedFile)
+        self.sendToScreen('https://ethernet.su/static/' + selectedFile)
 
     def savePassword(self):
         keyring.set_password(servicename, 'email', self.login.text())
@@ -92,7 +116,7 @@ def main(flaskProcess):
     sys.exit(0)
 
 def runWeb():
-    web.run(host='0.0.0.0')
+    web.run(host='0.0.0.0', port=443, ssl_context = context)
 
 if __name__ == '__main__': # Это знать надо
     flaskProcess = multiprocessing.Process(target=runWeb)
