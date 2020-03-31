@@ -100,7 +100,7 @@ class MainApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
 
     def playFile(self):
         selectedFile = self.filesList.currentItem().text()
-        self.sendToScreen('https://ethernet.su/static/' + selectedFile)
+        self.sendToScreen('https://' + ip + '/static/' + selectedFile)
 
     def savePassword(self):
         keyring.set_password(servicename, 'email', self.login.text())
