@@ -6,13 +6,12 @@ import keyring
 import requests
 import json
 import multiprocessing
+import subprocess
 import ssl
 from flask import Flask
 from flask import Response
 from werkzeug import serving
 
-
-SERVER_NAME = 'gvs 1.0'
 class localFlask(Flask):
     def process_response(self, response):
         response.headers['Connection'] = 'close'
@@ -27,16 +26,34 @@ class localFlask(Flask):
 
 web = localFlask(__name__)
 
-context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-context.load_verify_locations("cert/ca_bundle.crt")
-context.load_cert_chain("cert/certificate.crt", "cert/private.key")
 
 
 DEBUG = 1
+EN_SSL = 0
+SERVER_NAME = 'gvs 1.0'
+HEAD = "http://"
+IP = requests.get('https://api.ipify.org').text
+VBR="2500k"
+FPS="30"
+QUAL="medium"
+YOUTUBE_URL="rtmp://a.rtmp.youtube.com/live2"
+YOUTUBE_KEY="2f3bf-s7je-v1hu-ae3t"
 
-
-ip = requests.get('https://api.ipify.org').text + ':443'
+port = '5000'
+domain = ''
 servicename = 'yandex_station_local_video'
+
+
+
+if(EN_SSL):
+    context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+    context.load_verify_locations("cert/ca_bundle.crt")
+    context.load_cert_chain("cert/certificate.crt", "cert/private.key")
+    HEAD == "https://"
+    port = '443'
+
+if(domain != ''):
+    IP = domain
 
 
 class MainApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
@@ -46,7 +63,7 @@ class MainApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.update.clicked.connect(self.updateFiles)
         self.filesList.itemDoubleClicked.connect(self.playFile)
         self.save.clicked.connect(self.savePassword)
-        self.ip.setText('IP: ' + ip)
+        self.ip.setText('Host: ' + IP)
         self.login.setText(keyring.get_password(servicename, 'email'))
         if(self.login.text() == ''):
             self.tabWidget.setCurrentIndex(1)
@@ -100,11 +117,12 @@ class MainApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
 
     def playFile(self):
         selectedFile = self.filesList.currentItem().text()
-        self.sendToScreen('https://' + ip + '/static/' + selectedFile)
+        self.sendToScreen(HEAD + IP + ':' + port + '/static/' + selectedFile)
 
     def savePassword(self):
         keyring.set_password(servicename, 'email', self.login.text())
         keyring.set_password(servicename, keyring.get_password(servicename, 'email'), self.password.text())
+        keyring.set_password(servicename, 'y' + keyring.get_password(servicename, 'email'), self.youtube.text())
         self.logMSG()
 
 def main(flaskProcess):
@@ -116,7 +134,10 @@ def main(flaskProcess):
     sys.exit(0)
 
 def runWeb():
-    web.run(host='0.0.0.0', port=443, ssl_context = context)
+    if(EN_SSL):
+        web.run(host='0.0.0.0', port=port, ssl_context = context)
+    else:
+        web.run(host='0.0.0.0', port=port)
 
 if __name__ == '__main__': # Это знать надо
     flaskProcess = multiprocessing.Process(target=runWeb)

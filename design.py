@@ -98,6 +98,16 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_2.addWidget(self.password)
 
+        self.label_4 = QLabel(self.settings)
+        self.label_4.setObjectName(u"label_4")
+
+        self.verticalLayout_2.addWidget(self.label_4)
+
+        self.youtube = QLineEdit(self.settings)
+        self.youtube.setObjectName(u"youtube")
+
+        self.verticalLayout_2.addWidget(self.youtube)
+
         self.save = QPushButton(self.settings)
         self.save.setObjectName(u"save")
 
@@ -132,7 +142,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -147,6 +157,7 @@ class Ui_MainWindow(object):
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"\u041b\u043e\u0433\u0438\u043d", None))
         self.login.setText("")
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"\u041f\u0430\u0440\u043e\u043b\u044c", None))
+        self.label_4.setText(QCoreApplication.translate("MainWindow", u"YouTube Key", None))
         self.save.setText(QCoreApplication.translate("MainWindow", u"\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.settings), QCoreApplication.translate("MainWindow", u"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438", None))
         self.log.setText("")
